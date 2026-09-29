@@ -91,6 +91,7 @@ button { font: inherit; color: inherit; cursor: pointer; }
 :root[data-theme="dark"] .theme-btn .moon { display: none; }
 
 main { flex: 1; display: flex; flex-direction: column; }
+.foot .copy { margin-top: 2px; }
 .foot { text-align: center; color: var(--muted); font-size: .78rem; padding: 10px 0 calc(14px + env(safe-area-inset-bottom)); }
 
 /* Écran d'intro */
@@ -165,10 +166,12 @@ h1 { font-size: clamp(1.9rem, 7vw, 2.6rem); line-height: 1.08; margin: 0; letter
 .zone .ico svg { width: 100%; height: 100%; display: block; }
 .zone .lbl { font-weight: 700; font-size: 1.02rem; line-height: 1.15; }
 .zone .sub { font-size: .76rem; color: var(--muted); line-height: 1.2; }
-.zones.z4 .zone, .zones.z5 .zone { min-height: 104px; }
-.zones.z5 .zone:last-child { min-height: 78px; flex-direction: row; gap: 12px; }
+.zones.z4 .zone, .zones.z5 .zone { min-height: 112px; justify-content: flex-start; padding-top: 12px; }
+.zones.z4 .zone .ico, .zones.z5 .zone .ico { width: 48px; height: 48px; }
+.zones.z5 .zone:last-child { min-height: 78px; flex-direction: row; justify-content: center; gap: 12px; padding-top: 12px; }
 .zones.z5 .zone:last-child .ico { width: 34px; height: 34px; }
 .zones.z5 .zone:last-child .txt { display: flex; flex-direction: column; align-items: flex-start; text-align: left; }
+.zones.z5 .zone:last-child { border-left-style: dashed; border-right-style: dashed; border-bottom-style: dashed; }
 .zone.hover { background: var(--surface2); border-color: var(--c); transform: scale(1.03); }
 .zone:active { transform: scale(.97); }
 .zones.off .zone { pointer-events: none; opacity: .5; }
@@ -243,7 +246,7 @@ h1 { font-size: clamp(1.9rem, 7vw, 2.6rem); line-height: 1.08; margin: 0; letter
     </button>
   </header>
   <main id="screen" aria-live="polite"></main>
-  <div class="foot">Vos réponses ne sont pas enregistrées. Ce jeu fonctionne sans compte.</div>
+  <div class="foot"><div>Vos réponses ne sont pas enregistrées. Ce jeu fonctionne sans compte.</div><div class="copy">© <span id="yr">2026</span> 23 MindSet · Fares ATBA. Tous droits réservés.</div></div>
 </div>
 <div class="sheet" id="sheet" role="status" aria-live="polite" aria-hidden="true"></div>
 
@@ -265,6 +268,7 @@ var GAME = {
   title: "Qui parle ?",
   consigne: "Neuf répliques, trois rôles. Classez chaque réplique en Victime, Persécuteur ou Sauveur. La correction est immédiate.",
   meta: "9 répliques · environ 10 minutes · glissez la carte ou touchez un rôle",
+  debateTag: "Une réplique qui se discute : vous en reparlerez avec votre formateur.",
   hint: "Glissez la carte vers un rôle, ou touchez directement un rôle.",
   quote: true,
   note: {
@@ -339,10 +343,12 @@ var GAME = {
     setTheme(cur === "light" ? "dark" : "light");
   });
   setTheme(document.documentElement.getAttribute("data-theme"));
+  var yr = document.getElementById("yr");
+  if (yr) yr.textContent = String(new Date().getFullYear());
 
   /* ---------- Outils ---------- */
   function esc(s) {
-    return String(s).replace(/[&<>"]/g, function (c) {
+    return String(s).replace(/« /g, "«\u00A0").replace(/ »/g, "\u00A0»").replace(/ ([?:!;])/g, "\u00A0$1").replace(/[&<>"]/g, function (c) {
       return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c];
     });
   }
@@ -481,8 +487,8 @@ var GAME = {
               : '<span>Vous avez choisi</span>' + chipHTML(chosen) + '<span>et c’était</span>' + chipHTML(card.c)) +
         '</div>' +
         '<p class="why">' + esc(card.why) + '</p>' +
-        (card.debate ? '<div class="debate-tag">Une réplique qui se discute : vous en reparlerez avec votre formateur.</div>' : "") +
-        '<button class="btn" id="next" type="button">' + (last ? "Voir mon résultat" : "Réplique suivante") + '</button>' +
+        (card.debate ? '<div class="debate-tag">' + esc(G.debateTag) + '</div>' : "") +
+        '<button class="btn" id="next" type="button">' + (last ? "Voir mon résultat" : (G.nextLabel || "Réplique suivante")) + '</button>' +
       '</div>';
     sheet.style.setProperty("--fb", ok ? "var(--ok)" : "var(--ko)");
     sheet.innerHTML = html;
